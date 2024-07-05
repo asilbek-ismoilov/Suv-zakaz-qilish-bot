@@ -6,7 +6,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 from keyboard_buttons.default.location import kv
 from keyboard_buttons.default.water_button import num_water
-from keyboard_buttons.inline.inline_val import confirmation, deliver
+from keyboard_buttons.inline import inline_val
 
 
 @dp.message(F.text=="Zakas qilish 🛎")
@@ -81,9 +81,9 @@ async def number_water(message: Message, state:FSMContext):
 
     f_text = f"Ism-Familiya: {name} {surname} \nTel: {phone} \nSuv soni: {water} \n\nMa'lumot adminga yuborildi ✅ \nKun davomida sizga suv yetkazib berinadi ✅"
 
-    sent_message = await message.answer(f_text, reply_markup=confirmation)
+    sent_message = await message.answer(f_text, reply_markup=inline_val.confirmation)
     await bot.send_location(chat_id=CHANNELS[0], latitude=lat, longitude=long)
-    await bot.send_message(chat_id=CHANNELS[0], text=text, reply_markup=deliver)
+    await bot.send_message(chat_id=CHANNELS[0], text=text, reply_markup=inline_val.deliver)
     await state.clear()
 
     await asyncio.sleep(3600)
@@ -95,16 +95,13 @@ async def number_water_del(message:Message, state:FSMContext):
     await message.answer(text= "To'g'ri qiymat kiriting !")
     await message.delete()
 
+@dp.callback_query(F.data == "edit")
+async def confirmation(callback:CallbackQuery):
+    await callback.message.edit_text("Ma'lumotlaringizni yangilang:")
 
-# @dp.callback_query(F.data=="edit")
-# async def confirmation (callback_query: CallbackQuery, state: FSMContext):
-#     await callback_query.message.edit_text("Ma'lumotlaringizni yangilang:")
-
-# @dp.callback_query_handler(Text(equals="edit"))
-# async def edit_order(callback_query: CallbackQuery, state: FSMContext):
-#     await callback_query.message.edit_text("Ma'lumotlaringizni yangilang:")
-
-# @dp.callback_query(F.data=="deliver")
-# async def confirmation (callback_query: CallbackQuery):
-#     await callback_query.message
+@dp.callback_query(F.data == "deliver")
+async def confirmation(callback:CallbackQuery):
+    await callback.message.delete()
+    text = "Buyurtma yetkazib berinldi ✅"
+    await callback.message.answer(text)
     
